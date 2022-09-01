@@ -2,7 +2,11 @@
 title: "CLUA farmer registration"
 author: "Victor Kibisu"
 date: "2022-08-29"
-output: html_document
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +25,7 @@ reg_form <- read.csv("CLUA_AP_farmer_registration_form.csv")
 reg_details <- read.csv("CLUA_AP_farmer_registration_form-farm_details.csv")
 ```
 
-
+### merge data
 ```{r}
 ## merge the files
 ##rename column key
@@ -36,14 +40,14 @@ CLUA_farmer <- merge(reg_form, reg_details, by="PARENT_KEY")
 ### Descriptives of the data
 ```{r}
 df2 <- CLUA_farmer[,64:125]
-names(df2)
+#names(df2)
 
 ## structure of the data
-str(df2)
+#str(df2)
 ```
 ### clean data and run the descriptives
 ```{r}
-table(df2$group_climatechange.cc_response)
+#table(df2$group_climatechange.cc_response)
 ## create a function that splits the data into multiple coplumns
 split_into_multiple <- function(column, pattern = " ", into_prefix){
   cols <- str_split_fixed(column, pattern, n = Inf)
@@ -73,13 +77,13 @@ df3$cc_response_4 <- as.factor(df3$cc_response_4)
 levels(df3$cc_response_4) <- c("Use of Drought tolerant crops", "Rain water harvesting", "Irrigation", "Soil and water conservation", "Application of fertilizers and organic inputs", "Using different cropping systems")
 
 df3$cc_response_5 <- as.factor(df3$cc_response_5)
-levels(df3$cc_response_5) <- c("Soil and water conservation", "Application of fertilizers and organic inputs", "Using different cropping systems")
+levels(df3$cc_response_5) <- c("Use of Drought tolerant crops","Soil and water conservation", "Application of fertilizers and organic inputs", "Using different cropping systems")
 
 df3$cc_response_6 <- as.factor(df3$cc_response_6)
 levels(df3$cc_response_6) <- c( "Application of fertilizers and organic inputs", "Using different cropping systems")
 
 df3$cc_response_7 <- as.factor(df3$cc_response_7)
-levels(df3$cc_response_7) <- c( "Using different cropping systems")
+levels(df3$cc_response_7) <- c( "Irrigation","Using different cropping systems")
 
 c_response <- df3 %>% select(c(cc_response_1, cc_response_2, cc_response_3, cc_response_4, cc_response_5, cc_response_6, cc_response_7)) %>% gather(Response, type)
 freq(c_response$type) %>% kbl(caption = "Practices in response to climate change") %>%
@@ -97,12 +101,13 @@ c_response %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
   coord_flip()
 
 ```
-
+With respect to climate change the following are the practices that were used and the most used practice is application of fertilizers and organic inputs, soil and water conservation and thirdly using different cropping systems.
 
 ```{r}
 
 freq(df3$group_climatechange.cc_response_other)
 ```
+Other practices that were considered are APCNF methods and good water management practices.
 
 ```{r}
 table(df3$agric_advice.agricultural_advice)
@@ -120,8 +125,9 @@ df3 %>% ggplot(aes(agric_advice.agricultural_advice))+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+98% of the people receive agricultural advice.
+
 ```{r}
-table(df3$agric_advice.agricultural_advice_source)
 df3 <- df3 %>% 
   bind_cols(split_into_multiple(.$agric_advice.agricultural_advice_source, " ", "agric_source"))
 
@@ -135,16 +141,16 @@ df3$agric_source_3 <- as.factor(df3$agric_source_3)
 levels(df3$agric_source_3) <- c("TV","Development agencies", "Radio", "Lead farmers or other farmers", "Self help groups", "Government Extension","School children/youth", "Written materials",  "Phone", "Internet")
 
 df3$agric_source_4 <- as.factor(df3$agric_source_4)
-levels(df3$agric_source_4) <- c("TV","Development agencies", "Other", "Lead farmers or other farmers", "Self help groups", "Government Extension", "Written materials",  "Phone", "Internet")
+levels(df3$agric_source_4) <- c("TV","Development agencies", "Other", "Lead farmers or other farmers", "Self help groups", "Government Extension","School children/youth", "Written materials",  "Phone", "Internet")
 
 df3$agric_source_5 <- as.factor(df3$agric_source_5)
-levels(df3$agric_source_5) <- c("TV","Development agencies", "Radio",  "Government Extension","School children/youth", "Written materials",  "Phone", "Internet")
+levels(df3$agric_source_5) <- c("TV","Development agencies", "Radio","Self help groups",  "Government Extension","School children/youth", "Written materials",  "Phone", "Internet")
 
 df3$agric_source_6 <- as.factor(df3$agric_source_6)
-levels(df3$agric_source_6) <- c("Development agencies", "Other", "Lead farmers or other farmers", "School children/youth","Phone", "Internet")
+levels(df3$agric_source_6) <- c("Development agencies", "Other", "Lead farmers or other farmers", "School children/youth", "Written materials", "Phone", "Internet")
 
 df3$agric_source_7 <- as.factor(df3$agric_source_7)
-levels(df3$agric_source_7) <- c("Development agencies", "Other", "Internet")
+levels(df3$agric_source_7) <- c("Development agencies", "Other","Phone", "Internet")
 
 df3$agric_source_8 <- as.factor(df3$agric_source_8)
 levels(df3$agric_source_8) <- c("TV", "Development agencies")
@@ -165,12 +171,12 @@ Agric_source %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))+
   coord_flip()
 ```
-
+From the 98% who receive the agricultural advice, they do receive it mostly from lead farmers/other farmers, TV, Government extension, phone and development agencies.
 
 ```{r}
 table(df3$agric_advice.advice_source_other)
 ```
-
+Other sources of advice that they get from is APCNF and farmer organisations.
 
 ```{r}
 table(df3$agric_advice.information_source_preferred)
@@ -193,6 +199,8 @@ df3 %>%  ggplot(aes(fct_infreq(agric_advice.information_source_preferred)))+
   coord_flip()
 ```
 
+The farmers would prefer advice from lead farmers/other farmers, government extensions, phone and TV. But mostly its from lead farmers that is 59% of the people.
+
 ```{r}
 
 df3$farmer_groups.farmer_group <- as.factor(df3$farmer_groups.farmer_group)
@@ -210,6 +218,8 @@ df3 %>% ggplot(aes(farmer_groups.farmer_group))+
   theme_tufte()+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
+
+66% of the farmers belong to farmer groups.
 
 ```{r}
 df3$farmer_groups.farmer_group_type <- as.factor(df3$farmer_groups.farmer_group_type)
@@ -229,6 +239,8 @@ df3 %>%drop_na(farmer_groups.farmer_group_type) %>%  ggplot(aes(farmer_groups.fa
 
 ```
 
+With the different organisation types 46% belonged to farmer groups, 26.7% to cooperatives and 18.8% to women self help groups.
+
 ```{r}
 table(df3$farmer_groups.group_type_other)
 ```
@@ -244,13 +256,13 @@ df3$group_benefits_2 <- as.factor(df3$group_benefits_2)
 levels(df3$group_benefits_2) <- c("Knowledge & information", "Training", "Labour", "Tools and equipment", "Credit facilities","Marketing", "Other")
 
 df3$group_benefits_3 <- as.factor(df3$group_benefits_3)
-levels(df3$group_benefits_3) <- c("Knowledge & information", "Training", "Labour", "Tools and equipment", "Marketing")
+levels(df3$group_benefits_3) <- c("Knowledge & information", "Training", "Labour", "Tools and equipment","Credit facilities", "Marketing")
 
 df3$group_benefits_4 <- as.factor(df3$group_benefits_4)
 levels(df3$group_benefits_4) <- c( "Tools and equipment","Credit facilities", "Marketing")
 
 df3$group_benefits_5 <- as.factor(df3$group_benefits_5)
-levels(df3$group_benefits_5) <- c("Marketing")
+levels(df3$group_benefits_5) <- c("Credit facilities","Marketing")
 
 g_benefits <- df3 %>% select(c(group_benefits_1, group_benefits_2, group_benefits_3, group_benefits_4, group_benefits_5)) %>% gather(group_benefit, type)
 freq(g_benefits$type) %>% kbl(caption = "Farmer group benefits") %>%
@@ -272,11 +284,12 @@ p2 + theme(axis.text.x = element_text(face = "bold", color = "#993333",
 
 ```
 
+One of the interests was to look at the benefits they get from the groups, the most common was knowledge and information at 29.36%, credit facilities at 16.5% and training at 20.8%. These were the top 3 benefits.
 
 ```{r}
 table(df3$farmer_groups.group_benefits_other)
 ```
-
+Other types of benefits are exposure visits and sharing of knowledge.
 
 ```{r}
 table(df3$observation_comment)
@@ -307,6 +320,8 @@ df3 %>%drop_na(group_farm.farm_location) %>%  ggplot(aes(group_farm.farm_locatio
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+61% of the farms were located near habitations, 26% at the home backyards and 13% in the forest/tribal areas.
+
 ```{r}
 summary(df3$group_farm.farm_size)
 df3 %>% ggplot(aes(y =group_farm.farm_size))+
@@ -315,12 +330,12 @@ df3 %>% ggplot(aes(y =group_farm.farm_size))+
        y = "Farm size")
 ```
 
+With the size of the farms there is a variation but with outliers with the average being 4.354 and maximum as 80.
 
 ```{r}
-table(df3$group_farm.farm_size_unit)
-
 df3$group_farm.farm_size_unit <- as.factor(df3$group_farm.farm_size_unit)
-levels(df3$group_farm.farm_size_unit) <- c("Acres", "Hectares", "Other")\
+levels(df3$group_farm.farm_size_unit) <- c("Acres", "Hectares", "Other")
+
 freq(df3$group_farm.farm_size_unit)
 
 df3 %>% ggplot(aes(group_farm.farm_size_unit))+
@@ -329,12 +344,13 @@ df3 %>% ggplot(aes(group_farm.farm_size_unit))+
        x = "Farm size unit")
 ```
 
+The farm size was measured in acres where only 1 case was in hectares.
+
 ```{r}
 table(df3$group_farm.measurement_unit_other)
 ```
 
 ```{r}
-table(df3$group_farm.land_ownership)
 
 df3$group_farm.land_ownership <- as.factor(df3$group_farm.land_ownership)
 levels(df3$group_farm.land_ownership) <- c("Private/Purchase", "Private/Inheritance", "Communal", "Tribal area", "Rented", "Other")
@@ -350,6 +366,8 @@ df3 %>%drop_na(group_farm.land_ownership) %>%  ggplot(aes(group_farm.land_owners
   theme_tufte()+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
+
+With regard to land ownership most of the land was private through inheritance representing 52.78%, then tribal area 18% then rented at 17.20%.
 
 ```{r}
 df3$group_farm.land_ownership_other <- as.factor(df3$group_farm.land_ownership_other)
@@ -367,6 +385,7 @@ df3 %>%filter(group_farm.land_ownership_other !="NA") %>%  ggplot(aes(group_farm
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+With other land ownership schemes owned and heredity having 43%.
 
 ```{r}
 summary(df3$group_farm.cropping_area)
@@ -375,6 +394,8 @@ df3 %>% ggplot(aes(y =group_farm.cropping_area))+
   labs(title = "Cropping area",
        y = "Cropping area")
 ```
+
+The cropping area had a minimum of 0 and maximum of 30 acres, though some cases were outliers.
 
 ```{r}
 table(df3$group_farm.cropping_area_unit)
@@ -388,7 +409,7 @@ df3 %>% ggplot(aes(group_farm.cropping_area_unit))+
   labs(title = "Measurements used",
        x = "Cropping area unit")
 ```
-
+Bigger percentage of the units are in acres that is 99%.
 
 ```{r}
 table(df3$group_farm.cropping_area_other)
@@ -397,7 +418,7 @@ table(df3$group_farm.cropping_area_other)
 
 ```{r}
 df3$group_farm.land_use <- as.factor(df3$group_farm.land_use)
-levels(df3$group_farm.land_use) <- c("Agriculture","Agriculture",  "Forest land", "Pastureland", "Other")
+levels(df3$group_farm.land_use) <- c("Agriculture","Agriculture",  "Forest land", "Forest land", "Pastureland", "Other")
 freq(df3$group_farm.land_use)
 
 df3 %>%  ggplot(aes(group_farm.land_use))+
@@ -410,7 +431,7 @@ df3 %>%  ggplot(aes(group_farm.land_use))+
   theme_tufte()+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
-
+89.7% of the land is used for agriculture and 9.6% is used on forest land while only 0.3% is used as patureland.
 ```{r}
 table(df3$group_farm.land_use_other)
 ```
@@ -429,7 +450,7 @@ df3 %>%  ggplot(aes(group_soil.soil_quality))+
   theme_tufte()+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
-
+From the table and plot it shows that the soil quality is mostly medium which is 85%.
 
 ```{r}
 ## string variable
@@ -437,9 +458,8 @@ table(df3$group_soil.soil_quality_indicators)
 ```
 
 
-
+#### soil types
 ```{r}
-table(df3$group_soil.soil_types)
 df3$group_soil.soil_types <- as.factor(df3$group_soil.soil_types)
 levels(df3$group_soil.soil_types) <- c("NO", "YES")
 
@@ -457,10 +477,14 @@ df3 %>% ggplot(aes(group_soil.soil_types))+
 
 ```
 
+92% of the people said that there were no different types of soil in the farm where only 8% said that there was different soil types on there farms.
 
 ```{r}
-table(df3$group_soil.num_soil_types)
+freq(df3$group_soil.num_soil_types)
+
 ```
+Among the 8% of those with different type of soil, 92% said that there was 2 types of the soils while 8% said 1 type.
+
 
 ```{r}
 table(df3$group_soil.soil_types_description)
@@ -484,6 +508,7 @@ df3 %>% ggplot(aes(group_soil.soil_surface))+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+Only 17% of the soil is crusted while 83% is not crusted as in regards to state of the soil surface.
 
 ```{r}
 
@@ -503,6 +528,8 @@ df3 %>% ggplot(aes(group_soil.rock_gravel))+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+In terms of perecentage of the farms that contains rock gravel we see that farms with less than 5% was 64% while between 5 and 40 was 36%. we only had 2 cases were more than 40%.
+
 ```{r}
 df3$group_soil_erosion.erosion_prevalence <- as.factor(df3$group_soil_erosion.erosion_prevalence)
 levels(df3$group_soil_erosion.erosion_prevalence) <- c("NO", "YES")
@@ -519,10 +546,11 @@ df3 %>% ggplot(aes(group_soil_erosion.erosion_prevalence))+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+87% of the farmers indicated that they do not experience soil erosion problems.
 
 ```{r}
 df3$group_soil_erosion.erosion_type_farm <- as.factor(df3$group_soil_erosion.erosion_type_farm)
-levels(df3$group_soil_erosion.erosion_type_farm) <- c("Gully", "Sheet")
+levels(df3$group_soil_erosion.erosion_type_farm) <- c("Gully","Rill", "Sheet")
 
 freq(df3$group_soil_erosion.erosion_type_farm)
 df3 %>%drop_na(group_soil_erosion.erosion_type_farm) %>%  ggplot(aes(group_soil_erosion.erosion_type_farm))+
@@ -535,6 +563,8 @@ df3 %>%drop_na(group_soil_erosion.erosion_type_farm) %>%  ggplot(aes(group_soil_
   theme_tufte()+
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
+
+Among the 13% that experience soil erosion problems 73% experience gully erosion, 26% experience rill erosion and 1% face sheet erosion.
 
 ```{r}
 table(df3$group_soil_erosion.erosion_control_measures)
@@ -554,6 +584,8 @@ df3 %>%drop_na(group_soil_erosion.erosion_control_measures) %>%  ggplot(aes(grou
   theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
 ```
 
+Most used method in reducing the soil erosion is strusctural method which covers 97%.
+
 ```{r}
 table(df3$group_soil_erosion.erosion_control_description)
 ```
@@ -567,7 +599,7 @@ df3$Crop_type_1 <- as.factor(df3$Crop_type_1)
 levels(df3$Crop_type_1) <- c("Paddy", "Guord", "Turmeric", "Pepper", "Other", "Finger millet", "Pearl millet", "Brinjal", "Red gram", "Cow peas")
 
 df3$Crop_type_2 <- as.factor(df3$Crop_type_2)
-levels(df3$Crop_type_2) <- c("Paddy","Tubers", "Okra", "Turmeric", "Other", "Maize","Brinjal",  "Red gram", "Cow peas")
+levels(df3$Crop_type_2) <- c("Paddy","Tubers", "Okra","Guord", "Turmeric","Pepper", "Other","Finger millet", "Maize","Brinjal",  "Red gram", "Cow peas")
 
 df3$Crop_type_3 <- as.factor(df3$Crop_type_3)
 levels(df3$Crop_type_3) <- c("Tubers", "Okra", "Guord", "Turmeric", "Pepper", "Other",  "Maize", "Brinjal", "Red gram", "Cow peas", "Beans")
@@ -579,7 +611,7 @@ df3$Crop_type_5 <- as.factor(df3$Crop_type_5)
 levels(df3$Crop_type_5) <- c("Tubers", "Okra", "Other", "Pearl millet", "Maize", "Brinjal", "Red gram", "Beans")
 
 df3$Crop_type_6 <- as.factor(df3$Crop_type_6)
-levels(df3$Crop_type_6) <- c("Tubers", "Okra",  "Guord", "Other", "Pearl millet", "Brinjal")
+levels(df3$Crop_type_6) <- c("Tubers", "Okra",  "Guord","Turmeric", "Other", "Pearl millet", "Brinjal")
 
 df3$Crop_type_7 <- as.factor(df3$Crop_type_7)
 levels(df3$Crop_type_7) <- c("Tubers", "Turmeric", "Other", "Maize",  "Cow peas")
@@ -590,6 +622,555 @@ levels(df3$Crop_type_8) <- c("Tubers",  "Other", "Pearl millet")
 df3$Crop_type_9 <- as.factor(df3$Crop_type_9)
 levels(df3$Crop_type_9) <- c("Okra")
 
+crop_type <- df3 %>% select(c( Crop_type_1, Crop_type_2, Crop_type_3, Crop_type_4, Crop_type_5, Crop_type_6, Crop_type_7, Crop_type_8,Crop_type_9)) %>% gather(crop_type, type)
+freq(crop_type$type) %>% kbl(caption = "Crop types") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+crop_type %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Crop planted in the farm in the last 12 months",
+       x = "Crop type",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+
+
 
 ```
+
+Comparing the crops planted in the farm in the last 12 months we have Paddy as the most common crop planted followed by finger millet, Turmeric and pepper.
+```{r}
+library(tidytext)
+other_crop <- df3 %>% select(group_crop_production.crop_type_other)
+tk <- other_crop %>% unnest_tokens(word, group_crop_production.crop_type_other)
+
+# tk %>% anti_join(stop_words) %>% 
+#   count(word, sort = TRUE) %>% top_n(20)
+
+tk %>% anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  filter(n > 2) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+
+```
+
+We had other crops that appeared on the crops planted and in this we look at which were this crops and we see that ground nuts were the most planted, followed by tomatoes, then castor and coffee.
+
+```{r}
+
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$group_crop_production.crop_production, " ", "Crop_prod"))
+
+df3$Crop_prod_1 <- as.factor(df3$Crop_prod_1)
+levels(df3$Crop_prod_1) <- c("Low soil fertility", "None", "Other", "Unreliable rainfall", "Drought", "Low soil moisture", "Pests", "Diseases", "High cost of farm inputs")
+
+
+df3$Crop_prod_2 <- as.factor(df3$Crop_prod_2)
+levels(df3$Crop_prod_2) <- c("Low soil fertility", "Other", "Unreliable rainfall", "Drought", "Low soil moisture", "Wrong crop selection", "Pests", "Diseases", "High cost of farm inputs", "Lack of available labour")
+
+df3$Crop_prod_3 <- as.factor(df3$Crop_prod_3)
+levels(df3$Crop_prod_3) <- c("Low soil fertility", "Unreliable rainfall", "Drought", "Low soil moisture","Wrong crop selection", "Pests", "Diseases", "High cost of farm inputs", "Lack of available labour")
+
+
+df3$Crop_prod_4 <- as.factor(df3$Crop_prod_4)
+levels(df3$Crop_prod_4) <- c("Low soil fertility", "Unreliable rainfall", "Drought", "Low soil moisture","Wrong crop selection", "Pests", "Diseases", "High cost of farm inputs", "Lack of available labour")
+
+
+df3$Crop_prod_5 <- as.factor(df3$Crop_prod_5)
+levels(df3$Crop_prod_5) <- c("Low soil fertility", "None", "Unreliable rainfall", "Low soil moisture", "Pests", "Diseases", "High cost of farm inputs", "Lack of available labour")
+
+
+df3$Crop_prod_6 <- as.factor(df3$Crop_prod_6)
+levels(df3$Crop_prod_6) <- c("Low soil fertility", "Drought", "Pests", "Diseases", "High cost of farm inputs", "Lack of available labour")
+
+df3$Crop_prod_7 <- as.factor(df3$Crop_prod_7)
+levels(df3$Crop_prod_7) <- c("High cost of farm inputs", "Lack of available labour")
+
+df3$Crop_prod_8 <- as.factor(df3$Crop_prod_8)
+levels(df3$Crop_prod_8) <- c("Lack of available labour")
+
+crop_prod <- df3 %>% select(c( Crop_prod_1, Crop_prod_2, Crop_prod_3, Crop_prod_4, Crop_prod_5, Crop_prod_6, Crop_prod_7, Crop_prod_8)) %>% gather(crop_prod, type)
+freq(crop_prod$type) %>% kbl(caption = "Crop production") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+crop_prod %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Major factors affecting crop production\n in the farm",
+       x = "Factors",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+
+```
+Pests seem to be the major factor affecting crop production on the farm followed by diseases, unreliable rainfall and high cost of farm inputs.
+
+```{r}
+table(df3$group_crop_production.crop_production_other)
+```
+
+```{r}
+table(df3$group_crop_production.crop_productivity_enhance)
+
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$group_crop_production.crop_productivity_enhance, " ", "Crop_prod_enhance"))
+
+df3$Crop_prod_enhance_1 <- as.factor(df3$Crop_prod_enhance_1)
+levels(df3$Crop_prod_enhance_1) <- c("Chemical fertilizers", "Farmyard manure", "Compost", "Use of improved varieties", "Local varieties suited to the area", "Other")
+
+df3$Crop_prod_enhance_2 <- as.factor(df3$Crop_prod_enhance_2)
+levels(df3$Crop_prod_enhance_2) <- c("Chemical fertilizers", "Farmyard manure", "Compost", "Use of improved varieties", "Local varieties suited to the area", "Other")
+
+df3$Crop_prod_enhance_3 <- as.factor(df3$Crop_prod_enhance_3)
+levels(df3$Crop_prod_enhance_3) <- c("Chemical fertilizers", "Farmyard manure", "Compost", "Use of improved varieties", "Local varieties suited to the area", "Other")
+
+
+df3$Crop_prod_enhance_4 <- as.factor(df3$Crop_prod_enhance_4)
+levels(df3$Crop_prod_enhance_4) <- c("Chemical fertilizers","Compost", "Use of improved crop varieties", "Local varieties suited to the area", "Other")
+
+enhance <- df3 %>% select(Crop_prod_enhance_1, Crop_prod_enhance_2, Crop_prod_enhance_3, Crop_prod_enhance_4) %>% gather(crop_enhance, type)
+
+freq(enhance$type) %>% kbl(caption = "Crop production enhance") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+enhance %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "How do you enhance crop productivity\n in the farm",
+       x = "Crop enhance",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+
+```
+The crop productivity in the farms are highly enhanced by the following methods farmyard manure, chemical fertilizers, compost and local crop varieties suited for the area.
+
+```{r}
+other_crop_prod <- df3 %>% select(group_crop_production.crop_productivity_other)
+tk1 <- other_crop_prod %>% unnest_tokens(word, group_crop_production.crop_productivity_other)
+
+tk1 %>% anti_join(stop_words) %>% 
+  count(word, sort = TRUE)
+
+tk1 %>% anti_join(stop_words) %>% 
+  count(word, sort = TRUE) %>% 
+  filter(n > 2) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+```
+Other methods used for enhancing the crop productivity are jeevamrutam, gvm and APCNF methods.
+
+```{r}
+
+df3$farm_management.crop_rotation <- as.factor(df3$farm_management.crop_rotation)
+levels(df3$farm_management.crop_rotation) <- c("NO", "YES")
+
+freq(df3$farm_management.crop_rotation)
+df3 %>%drop_na(farm_management.crop_rotation) %>%  ggplot(aes(farm_management.crop_rotation))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Do you practice crop rotation on your farm",
+       x = "Crop rotation",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+57% of the farmers practice crop rotation on their farms.
+
+```{r}
+table(df3$farm_management.fallowing)
+df3$farm_management.fallowing <- as.factor(df3$farm_management.fallowing)
+levels(df3$farm_management.fallowing) <- c("NO", "YES")
+
+freq(df3$farm_management.fallowing)
+df3 %>%drop_na(farm_management.fallowing) %>%  ggplot(aes(farm_management.fallowing))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Do you practice fallowing on your farm",
+       x = "Fallowing",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+25% of the farmers practice fallowing on the farm.
+
+```{r}
+summary(df3$farm_management.fallow_percent)
+df3 %>% ggplot(aes(y = farm_management.fallow_percent))+
+  geom_boxplot(fill = "coral")+
+  labs(y = "Fallow percent",
+       title = "Percent of land left for fallowing")
+```
+
+The farm management in terms fallow percent its minimum is 0.1, and maximum is 100 this means that there are those who practice fallowing 100% on there farms.
+
+```{r}
+summary(df3$farm_management.fallow_years)
+df3 %>% ggplot(aes(y = farm_management.fallow_years))+
+  geom_boxplot(fill = "coral")+
+  labs(y = "Fallow years",
+       title = "How long the land is left for fallow")
+```
+
+maximum number of years for fallowing is 7 years and minimum is 0.25.
+
+```{r}
+df3$farm_management.burning <- as.factor(df3$farm_management.burning)
+levels(df3$farm_management.burning) <- c("NO", "YES")
+
+freq(df3$farm_management.burning)
+df3 %>%drop_na(farm_management.burning) %>%  ggplot(aes(farm_management.burning))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Is the land burnt",
+       x = "Burning",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+Only 2% of the farmers said that there land is burnt.
+
+```{r}
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$farm_management.crop_residue, " ", "Crop_residue"))
+
+df3$Crop_residue_1 <- as.factor(df3$Crop_residue_1)
+levels(df3$Crop_residue_1) <- c("Burnt", "Left in the field", "Used as mulch", "Used as fodder", "Other")
+
+df3$Crop_residue_2 <- as.factor(df3$Crop_residue_2)
+levels(df3$Crop_residue_2) <- c("Left in the field", "Used as mulch", "Used as fodder", "Other")
+
+df3$Crop_residue_3 <- as.factor(df3$Crop_residue_3)
+levels(df3$Crop_residue_3) <- c("Burnt", "Other")
+
+crop_residue <- df3 %>% select(Crop_residue_1, Crop_residue_2, Crop_residue_3) %>% gather(crop_residue, type)
+
+freq(crop_residue$type) %>% kbl(caption = "Crop residue") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+crop_residue %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "How do you use the crop residues after\n harvest?",
+       x = "Crop residue",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+```
+
+Most of the crop residues after harvest were left in the field that is 43.7%, 33.8% was used as fodder and only 7% was as mulch.
+
+```{r}
+table(df3$farm_management.crop_residue_other)
+```
+
+```{r}
+table(df3$farm_management.farmyard_manure_use)
+
+df3$farm_management.farmyard_manure_use <- as.factor(df3$farm_management.farmyard_manure_use)
+levels(df3$farm_management.farmyard_manure_use) <- c("NO", "YES")
+
+freq(df3$farm_management.farmyard_manure_use)
+df3 %>%drop_na(farm_management.farmyard_manure_use) %>%  ggplot(aes(farm_management.farmyard_manure_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was farmyard applied in the past during the last season",
+       x = "Farmyard Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+During the last season farmyard was only applied 65% on the farms.
+
+```{r}
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$farm_management.manure_use_crops, " ", "manure_crops"))
+df3$manure_crops_1 <- as.factor(df3$manure_crops_1)
+levels(df3$manure_crops_1) <- c("Paddy", "Guord","Turmeric", "Other", "Finger millet", "Brinjal", "Red gram")
+
+df3$manure_crops_2 <- as.factor(df3$manure_crops_2)
+levels(df3$manure_crops_2) <- c("Paddy","Tubers", "Okra", "Guord","Turmeric", "Other","Finger millet", "Brinjal", "Red gram", "Cowpeas")
+
+df3$manure_crops_3 <- as.factor(df3$manure_crops_3)
+levels(df3$manure_crops_3) <- c("Tubers", "Okra", "Turmeric", "Other","Maize", "Red gram", "Cowpeas", "Beans")
+
+df3$manure_crops_4 <- as.factor(df3$manure_crops_4)
+levels(df3$manure_crops_4) <- c("Tubers", "Other","Pearl millet", "Red gram", "Cowpeas", "Beans")
+
+df3$manure_crops_5 <- as.factor(df3$manure_crops_5)
+levels(df3$manure_crops_5) <- c("Okra", "Red gram", "Cowpeas")
+
+df3$manure_crops_6 <- as.factor(df3$manure_crops_6)
+levels(df3$manure_crops_6) <- c( "Brinjal", "Red gram")
+
+df3$manure_crops_7 <- as.factor(df3$manure_crops_7)
+levels(df3$manure_crops_7) <- c("Maize", "Brinjal")
+
+df3$manure_crops_8 <- as.factor(df3$manure_crops_8)
+levels(df3$manure_crops_8) <- c("Pearl millet","Maize")
+
+df3$manure_crops_9 <- as.factor(df3$manure_crops_9)
+levels(df3$manure_crops_9) <- c("Pearl millet")
+
+manure_crops <- df3 %>% select(manure_crops_1, manure_crops_2, manure_crops_3, manure_crops_4, manure_crops_5, manure_crops_6, manure_crops_7, manure_crops_8, manure_crops_9) %>% gather(manure_crops, type)
+
+freq(manure_crops$type) %>% kbl(caption = "Manure crops") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+manure_crops %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Crops cultivated by use of farmyard manure",
+       x = "Manure crops",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+```
+Crops that were cultivated by use of manure are as follows paddy, finger millet, red gram and turmeric. those were the top crops.
+
+```{r}
+table(df3$farm_management.compost_use)
+df3$farm_management.compost_use <- as.factor(df3$farm_management.compost_use)
+levels(df3$farm_management.compost_use) <- c("NO", "YES")
+
+freq(df3$farm_management.compost_use)
+df3 %>%drop_na(farm_management.compost_use) %>%  ggplot(aes(farm_management.compost_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was compost applied in the past during the last season",
+       x = "Compost Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+Only 27% use compost on the farms.
+
+```{r}
+table(df3$farm_management.compost_use_crops)
+
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$farm_management.compost_use_crops, " ", "compost_crops"))
+
+df3$compost_crops_1 <- as.factor(df3$compost_crops_1)
+levels(df3$compost_crops_1) <- c("Paddy","Tubers", "Turmeric", "Pepper", "Other", "Finger millet", "Pearl millet", "Brinjal")
+
+df3$compost_crops_2 <- as.factor(df3$compost_crops_2)
+levels(df3$compost_crops_2) <- c("Okra", "Guord","Turmeric", "Pepper", "Other", "Finger millet", "Maize", "Brinjal")
+
+df3$compost_crops_3 <- as.factor(df3$compost_crops_3)
+levels(df3$compost_crops_3) <- c("Tubers", "Okra", "Turmeric", "Other", "Brinjal")
+
+df3$compost_crops_4 <- as.factor(df3$compost_crops_4)
+levels(df3$compost_crops_4) <- c("Okra", "Turmeric", "Pepper", "Other", "Brinjal")
+
+df3$compost_crops_5 <- as.factor(df3$compost_crops_5)
+levels(df3$compost_crops_5) <- c("Other")
+
+compost_crops <- df3 %>% select(compost_crops_1, compost_crops_2, compost_crops_3, compost_crops_4, compost_crops_5) %>% gather(compost_crops, type)
+
+freq(compost_crops$type) %>% kbl(caption = "Compost crops") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+compost_crops %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Crops cultivated by use of compost",
+       x = "Compost crops",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+```
+
+Crops that were with compost are Paddy 30.43%, Turmeric 21.38% and finger millet 18.12%.
+
+```{r}
+table(df3$farm_management.mulch_use)
+df3$farm_management.mulch_use <- as.factor(df3$farm_management.mulch_use)
+levels(df3$farm_management.mulch_use) <- c("NO", "YES")
+
+freq(df3$farm_management.mulch_use)
+df3 %>%drop_na(farm_management.mulch_use) %>%  ggplot(aes(farm_management.mulch_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was mulch applied in the past during the last season",
+       x = "Mulch Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+Only 3% of the farms is where mulch was applied or used in the past during the last season.
+
+```{r}
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$farm_management.mulch_use_crops, " ", "mulch_crops"))
+
+df3$mulch_crops_1 <- as.factor(df3$mulch_crops_1)
+levels(df3$mulch_crops_1) <- c("Turmeric", "Pepper", "Other", "Pearl millet", "Red gram", "Cowpeas")
+
+df3$mulch_crops_2 <- as.factor(df3$mulch_crops_2)
+levels(df3$mulch_crops_2) <- c("Okra", "Other", "Maize", "Red gram")
+
+df3$mulch_crops_3 <- as.factor(df3$mulch_crops_3)
+levels(df3$mulch_crops_3) <- c("Tubers", "Brinjal")
+
+df3$mulch_crops_4 <- as.factor(df3$mulch_crops_4)
+levels(df3$mulch_crops_4) <- c( "Okra", "Red gram", "Cowpeas")
+
+df3$mulch_crops_5 <- as.factor(df3$mulch_crops_5)
+levels(df3$mulch_crops_5) <- c("Tubers", "Red gram")
+
+df3$mulch_crops_6 <- as.factor(df3$mulch_crops_6)
+levels(df3$mulch_crops_6) <- c("Okra", "Brinjal")
+
+df3$mulch_crops_7 <- as.factor(df3$mulch_crops_7)
+levels(df3$mulch_crops_7) <- c("Gourd", "Maize")
+
+df3$mulch_crops_8 <- as.factor(df3$mulch_crops_8)
+levels(df3$mulch_crops_8) <- c("Other", "Pearl millet")
+
+
+mulch_crops <- df3 %>% select(mulch_crops_1, mulch_crops_2, mulch_crops_3, mulch_crops_4, mulch_crops_5, mulch_crops_6, mulch_crops_7, mulch_crops_8) %>% gather(mulch_crops, type)
+
+freq(mulch_crops$type) %>% kbl(caption = "mulch crops") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+mulch_crops %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Crops cultivated by use of mulch",
+       x = "Mulch crops",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+
+```
+
+With the mulch crops we have red grams, Okra and Tubers as top 3.
+
+```{r}
+df3$farm_management.chemical_fertilizer_use <- as.factor(df3$farm_management.chemical_fertilizer_use)
+levels(df3$farm_management.chemical_fertilizer_use) <- c("NO", "YES")
+
+freq(df3$farm_management.chemical_fertilizer_use)
+df3 %>%drop_na(farm_management.chemical_fertilizer_use) %>%  ggplot(aes(farm_management.chemical_fertilizer_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was chemical fertilizer applied in the past\n during the last season",
+       x = "Chemical fertilizer Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+Only 48.6% of the farms was where the chemical fertilzers were applied in the last season, 51.4% did not apply.
+
+```{r}
+df3 <- df3 %>% 
+   bind_cols(split_into_multiple(.$farm_management.fertilizer_use_crops, " ", "fertilizer_crops"))
+df3$fertilizer_crops_1 <- as.factor(df3$fertilizer_crops_1)
+levels(df3$fertilizer_crops_1) <- c("Paddy", "Other", "Finger millet", "Red gram", "Cowpeas")
+
+df3$fertilizer_crops_2 <- as.factor(df3$fertilizer_crops_2)
+levels(df3$fertilizer_crops_2) <- c("Tubers", "Okra", "Other", "Red gram")
+
+df3$fertilizer_crops_3 <- as.factor(df3$fertilizer_crops_3)
+levels(df3$fertilizer_crops_3) <- c("Other")
+
+fertilizer_crops <- df3 %>% select(fertilizer_crops_1, fertilizer_crops_2, fertilizer_crops_3) %>% gather(fertilizer_crops, type)
+
+freq(fertilizer_crops$type) %>% kbl(caption = "fertilizer crops") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+fertilizer_crops %>%drop_na(type) %>%  ggplot(aes(fct_infreq(type)))+
+   geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#79c36a") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 0.25) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Crops cultivated by use of fertilizer",
+       x = "fertilizer crops",
+       y = "Frequency")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 10,angle = 90, hjust = 1))
+
+```
+
+Other crops were the mostly used for fertilizers, then paddy and red gram.
+
+```{r}
+df3$farm_management.herbicide_use <- as.factor(df3$farm_management.herbicide_use)
+levels(df3$farm_management.herbicide_use) <- c("NO", "YES")
+
+freq(df3$farm_management.herbicide_use)
+df3 %>%drop_na(farm_management.herbicide_use) %>%  ggplot(aes(farm_management.herbicide_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was herbicide applied in the past\n during the last season",
+       x = "Herbicide Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+Only 17% applied herbicides on the farms.
+
+```{r}
+df3$farm_management.pesticide_use <- as.factor(df3$farm_management.pesticide_use)
+levels(df3$farm_management.pesticide_use) <- c("NO", "YES")
+
+freq(df3$farm_management.pesticide_use)
+df3 %>%drop_na(farm_management.pesticide_use) %>%  ggplot(aes(farm_management.pesticide_use))+
+  geom_bar(fill = "#79c36a", aes(y = (..count..)/sum(..count..)))+
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = 1.5, colour = "black")+
+  scale_y_continuous(labels = percent) +
+  labs(title = "Was pesticide applied in the past\n during the last season",
+       x = "Pesticide Use",
+       y="Percentage")+
+  theme_tufte()+
+  theme(plot.title = element_text(face = "bold", size = 20, hjust = 0.5))
+```
+
+Only 46.2% applied pesticides on the farm.
+
 
